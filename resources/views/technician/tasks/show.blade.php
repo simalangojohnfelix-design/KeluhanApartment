@@ -1,9 +1,11 @@
 @extends('layouts.app')
 @section('content')
 <div class="max-w-2xl mx-auto space-y-6">
+    <a href="{{ route('technician.tasks.index') }}" class="text-sm text-gray-500 hover:text-gray-700">&larr; Kembali ke Daftar Tugas</a>
+
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-xl font-bold mb-2">WO-{{ $task->id }}: {{ optional($task->complaint)->title }}</h2>
-        <p class="text-sm text-gray-500">Unit: <strong>{{ optional(optional($task->complaint)->propertyUnit)->unit_number }}</strong> &bull; Penyewa: <strong>{{ optional(optional($task->complaint)->tenant)->name }}</strong> ({{ optional(optional($task->complaint)->tenant)->email }})</p>
+        <p class="text-sm text-gray-500">Unit: <strong>{{ optional(optional($task->complaint)->propertyUnit)->unit_number }}</strong> - Penyewa: <strong>{{ optional(optional($task->complaint)->tenant)->name }}</strong></p>
         <p class="text-gray-700 mt-3">{{ optional($task->complaint)->description }}</p>
         @if(optional($task->complaint)->photo)
         <div class="mt-3">
@@ -23,9 +25,9 @@
                 <label class="block text-sm font-medium">Status Pengerjaan</label>
                 <select name="status" class="mt-1 w-full border rounded p-2">
                     <option value="pending" {{ $task->status=='pending'?'selected':'' }}>Pending</option>
-                    <option value="working" {{ $task->status=='working'?'selected':'' }}>Start Work</option>
-                    <option value="on_hold" {{ $task->status=='on_hold'?'selected':'' }}>? On Hold</option>
-                    <option value="completed" {{ $task->status=='completed'?'selected':'' }}>? Completed</option>
+                    <option value="working" {{ $task->status=='working'?'selected':'' }}>Mulai Kerjakan</option>
+                    <option value="on_hold" {{ $task->status=='on_hold'?'selected':'' }}>Ditangguhkan</option>
+                    <option value="completed" {{ $task->status=='completed'?'selected':'' }}>Selesai</option>
                 </select>
             </div>
             <div>
@@ -39,7 +41,7 @@
             <div>
                 <label class="block text-sm font-medium">Estimasi Biaya (Rp)</label>
                 <input type="number" name="cost_estimate" value="{{ $task->cost_estimate }}" class="mt-1 w-full border rounded p-2" placeholder="0">
-                <p class="text-xs text-gray-500 mt-1">? Jika melebihi Rp 1.000.000, otomatis diajukan ke Owner untuk persetujuan.</p>
+                <p class="text-xs text-gray-500 mt-1">Jika melebihi Rp 1.000.000, otomatis diajukan ke Owner untuk persetujuan.</p>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>

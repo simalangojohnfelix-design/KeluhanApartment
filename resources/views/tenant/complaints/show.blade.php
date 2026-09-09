@@ -1,6 +1,8 @@
 @extends('layouts.app')
 @section('content')
 <div class="max-w-2xl mx-auto space-y-6">
+    <a href="{{ route('tenant.complaints.index') }}" class="text-sm text-gray-500 hover:text-gray-700">&larr; Kembali ke Riwayat Keluhan</a>
+
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex justify-between">
             <div>
@@ -15,16 +17,17 @@
         @endif
     </div>
 
-    {{-- TIMELINE --}}
     <div class="bg-white rounded-lg shadow p-6">
         <h3 class="font-bold text-lg mb-4">Timeline Perbaikan</h3>
         <ol class="relative border-l border-gray-200 ml-3 space-y-6">
             @php
-                $steps = ['pending' => ['label'=>'Keluhan Masuk','date'=>$complaint->created_at,'done'=>true],
-                          'verified' => ['label'=>'Diverifikasi Admin','date'=>$complaint->updated_at,'done'=>in_array($complaint->status,['verified','assigned','in_progress','resolved'])],
-                          'assigned' => ['label'=>'Teknisi Ditugaskan','date'=>$complaint->updated_at,'done'=>in_array($complaint->status,['assigned','in_progress','resolved'])],
-                          'in_progress' => ['label'=>'Sedang Dikerjakan','date'=>$complaint->updated_at,'done'=>in_array($complaint->status,['in_progress','resolved'])],
-                          'resolved' => ['label'=>'Selesai','date'=>$complaint->updated_at,'done'=>$complaint->status=='resolved']];
+                $steps = [
+                    ['label'=>'Keluhan Masuk','date'=>$complaint->created_at,'done'=>true],
+                    ['label'=>'Diverifikasi Admin','date'=>$complaint->updated_at,'done'=>in_array($complaint->status,['verified','assigned','in_progress','resolved'])],
+                    ['label'=>'Teknisi Ditugaskan','date'=>$complaint->updated_at,'done'=>in_array($complaint->status,['assigned','in_progress','resolved'])],
+                    ['label'=>'Sedang Dikerjakan','date'=>$complaint->updated_at,'done'=>in_array($complaint->status,['in_progress','resolved'])],
+                    ['label'=>'Selesai','date'=>$complaint->updated_at,'done'=>$complaint->status=='resolved'],
+                ];
             @endphp
             @foreach($steps as $step)
             <li class="mb-2 ml-4">
@@ -36,7 +39,6 @@
         </ol>
     </div>
 
-    {{-- TEKNISI INFO --}}
     @if($complaint->workOrder && $complaint->workOrder->technician)
     <div class="bg-blue-50 rounded-lg shadow p-5">
         <h3 class="font-bold mb-2">Teknisi yang Ditugaskan</h3>
@@ -46,33 +48,32 @@
     </div>
     @endif
 
-    {{-- RATING --}}
     @if($complaint->status == 'resolved' && !$complaint->is_confirmed)
     <div class="bg-yellow-50 rounded-lg shadow p-6 border border-yellow-200">
-        <h3 class="font-bold text-lg mb-3">? Berikan Penilaian</h3>
+        <h3 class="font-bold text-lg mb-3">Berikan Penilaian</h3>
         <form action="{{ route('tenant.complaints.rate', $complaint->id) }}" method="POST" class="space-y-3">
             @csrf
             <div>
-                <label class="block text-sm font-medium">Rating (1-5 bintang)</label>
+                <label class="block text-sm font-medium">Rating (1-5)</label>
                 <select name="rating" class="mt-1 w-full border rounded p-2" required>
-                    <option value="5"> Sangat Puas</option>
-                    <option value="4"> Puas</option>
-                    <option value="3"> Cukup</option>
-                    <option value="2">Kurang</option>
-                    <option value="1">? Sangat Kurang</option>
+                    <option value="5">5 - Sangat Puas</option>
+                    <option value="4">4 - Puas</option>
+                    <option value="3">3 - Cukup</option>
+                    <option value="2">2 - Kurang</option>
+                    <option value="1">1 - Sangat Kurang</option>
                 </select>
             </div>
             <div>
                 <label class="block text-sm font-medium">Ulasan</label>
                 <textarea name="review" rows="3" class="mt-1 w-full border rounded p-2" placeholder="Ceritakan pengalaman Anda..."></textarea>
             </div>
-            <button class="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded font-bold">Kirim Ulasan & Konfirmasi Selesai</button>
+            <button class="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded font-bold">Kirim Ulasan dan Konfirmasi Selesai</button>
         </form>
     </div>
     @elseif($complaint->is_confirmed)
     <div class="bg-green-50 rounded-lg shadow p-5 text-center">
-        <p class="font-bold text-green-700">? Perbaikan telah dikonfirmasi!</p>
-        <p class="text-2xl mt-2">{{ str_repeat('?', $complaint->rating) }}</p>
+        <p class="font-bold text-green-700">Perbaikan telah dikonfirmasi!</p>
+        <p class="text-lg mt-2">Rating: {{ $complaint->rating }}/5</p>
         <p class="text-gray-600 mt-1 italic">"{{ $complaint->review }}"</p>
     </div>
     @endif

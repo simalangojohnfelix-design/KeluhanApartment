@@ -19,7 +19,8 @@ Route::get('/', function () {
 });
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login/tenant', [AuthController::class, 'loginTenant'])->name('login.tenant');
+Route::post('/login/staff', [AuthController::class, 'loginStaff'])->name('login.staff');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Admin Routes
