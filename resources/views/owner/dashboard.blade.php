@@ -1,80 +1,113 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palazzo Palace - Executive Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 flex h-screen overflow-hidden" style="font-family: 'Inter', sans-serif;">
 
-@section('content')
-<div class="mb-10" data-aos="fade-right">
-    <h1 class="font-playfair text-4xl font-bold text-gray-900">Executive Dashboard</h1>
-    <p class="text-gray-500 mt-2 font-light">Property operational performance summary</p>
-</div>
+    <!-- Sidebar Hitam Owner -->
+    <aside class="w-64 bg-gray-950 text-white flex flex-col shadow-2xl flex-shrink-0">
+        <div class="p-8 border-b border-gray-800">
+            <h1 class="text-2xl font-bold" style="font-family: 'Playfair Display', serif;">Palazzo Palace</h1>
+            <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest">Owner Panel</p>
+        </div>
+        
+        <nav class="flex-1 py-6 px-4 space-y-2 text-sm font-medium">
+            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 px-4 mt-2">Operasional</div>
+            <a href="{{ route('owner.dashboard') }}" class="block px-4 py-2.5 bg-blue-600 text-white font-bold shadow-md rounded-lg transition">Executive Dashboard</a>
+            <a href="{{ route('owner.approvals.index') }}" class="block px-4 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition flex justify-between items-center">
+                <span>Persetujuan Biaya</span>
+                @if($pendingApprovals > 0)
+                    <span class="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">{{ $pendingApprovals }}</span>
+                @endif
+            </a>
+            <a href="{{ route('owner.cost-log.index') }}" class="block px-4 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition">Riwayat Biaya (Log)</a>
+            
+            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 px-4 mt-6">Manajemen Mutlak</div>
+            <a href="{{ route('owner.users.index') }}" class="block px-4 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition">Kelola Pengguna</a>
+            <a href="{{ route('owner.units.index') }}" class="block px-4 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition">Kelola Unit</a>
+            <a href="{{ route('owner.assets.index') }}" class="block px-4 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition">Kelola Aset</a>
+        </nav>
 
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-    <div class="bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 p-6" data-aos="fade-up" data-aos-delay="100">
-        <p class="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-2">Cost This Month</p>
-        <p class="font-playfair text-2xl font-bold text-gray-900">Rp {{ number_format($totalCostMonth, 0, ',', '.') }}</p>
-    </div>
-    <div class="bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 p-6" data-aos="fade-up" data-aos-delay="200">
-        <p class="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-2">Cost This Year</p>
-        <p class="font-playfair text-2xl font-bold text-gray-900">Rp {{ number_format($totalCostYear, 0, ',', '.') }}</p>
-    </div>
-    <div class="bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 p-6" data-aos="fade-up" data-aos-delay="300">
-        <p class="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-2">Asset Health</p>
-        <p class="font-playfair text-2xl font-bold text-green-700">{{ $assetHealthPct }}%</p>
-    </div>
-    <div class="bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 p-6" data-aos="fade-up" data-aos-delay="400">
-        <p class="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-2">Resolved Requests</p>
-        <p class="font-playfair text-2xl font-bold text-gray-900">{{ $resolvedComplaints }} <span class="text-sm font-light text-gray-400">/ {{ $totalComplaints }}</span></p>
-    </div>
-</div>
+        <div class="p-4 border-t border-gray-800">
+            <div class="px-4 mb-4 text-sm font-medium text-gray-300">Hak Akses: {{ Auth::user()->name }}</div>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="w-full text-left px-4 py-2 text-red-400 hover:text-red-300 hover:bg-gray-900 rounded-lg transition font-bold text-sm">&larr; Keluar Sistem</button>
+            </form>
+        </div>
+    </aside>
 
-@if($pendingApprovals > 0)
-<div class="bg-gray-900 text-white rounded-2xl shadow-lg p-8 mb-10 flex flex-col md:flex-row md:items-center justify-between" data-aos="zoom-in">
-    <div>
-        <h3 class="font-playfair text-2xl font-bold mb-2">Pending Approvals</h3>
-        <p class="text-gray-300 font-light text-sm">{{ $pendingApprovals }} cost submissions require your executive review.</p>
-    </div>
-    <a href="{{ route('owner.approvals.index') }}" class="mt-4 md:mt-0 bg-white text-gray-900 px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition shadow-sm inline-block">Review Now</a>
-</div>
-@endif
+    <!-- Konten Utama -->
+    <main class="flex-1 overflow-y-auto p-10">
+        <div class="mb-10">
+            <h2 class="text-4xl font-bold text-gray-900" style="font-family: 'Playfair Display', serif;">Executive Dashboard</h2>
+            <p class="text-gray-500 mt-2 font-medium">Ringkasan performa operasional, finansial, dan penguasaan aset properti.</p>
+        </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-    <div class="bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 p-8" data-aos="fade-up">
-        <h3 class="font-playfair text-xl font-bold text-gray-900 mb-6">Request Volume by Category</h3>
-        @forelse($complaintsByCategory as $item)
-        @php $pct = $totalComplaints > 0 ? round(($item->total / $totalComplaints) * 100) : 0; @endphp
-        <div class="mb-5">
-            <div class="flex justify-between text-sm mb-2">
-                <span class="font-medium text-gray-700">{{ $item->category ?? 'Uncategorized' }}</span>
-                <span class="text-gray-500">{{ $item->total }}</span>
+        @if($pendingApprovals > 0)
+        <div class="bg-gray-900 text-white rounded-2xl shadow-lg p-8 mb-10 flex flex-col md:flex-row md:items-center justify-between">
+            <div>
+                <h3 class="text-2xl font-bold mb-2" style="font-family: 'Playfair Display', serif;">Persetujuan Tertunda</h3>
+                <p class="text-gray-400 text-sm">Terdapat <strong class="text-white">{{ $pendingApprovals }} pengajuan anggaran</strong> dari teknisi yang memerlukan validasi Anda.</p>
             </div>
-            <div class="w-full bg-gray-100 rounded-full h-1.5">
-                <div class="bg-gray-900 h-1.5 rounded-full transition-all duration-1000" style="width: 0%" data-width="{{ $pct }}%"></div>
+            <a href="{{ route('owner.approvals.index') }}" class="mt-4 md:mt-0 bg-white text-gray-900 px-6 py-3 rounded-xl text-sm font-bold hover:bg-gray-100 transition shadow-sm inline-block">
+                Tinjau Sekarang &rarr;
+            </a>
+        </div>
+        @endif
+
+        <!-- Kartu Metrik Properti (CRUD Mutlak) -->
+        <h3 class="font-bold text-gray-800 uppercase tracking-widest text-xs mb-4">Penguasaan Properti</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <a href="{{ route('owner.users.index') }}" class="block bg-indigo-50 border border-indigo-100 rounded-2xl p-6 hover:shadow-md transition">
+                <p class="text-xs font-bold tracking-widest uppercase text-indigo-400 mb-2">Total Pengguna</p>
+                <div class="flex justify-between items-end">
+                    <p class="text-3xl font-bold text-indigo-900">{{ $totalUsers }}</p>
+                    <span class="text-indigo-600 font-bold text-sm">Kelola &rarr;</span>
+                </div>
+            </a>
+            <a href="{{ route('owner.units.index') }}" class="block bg-blue-50 border border-blue-100 rounded-2xl p-6 hover:shadow-md transition">
+                <p class="text-xs font-bold tracking-widest uppercase text-blue-400 mb-2">Total Unit Apartemen</p>
+                <div class="flex justify-between items-end">
+                    <p class="text-3xl font-bold text-blue-900">{{ $totalUnits }}</p>
+                    <span class="text-blue-600 font-bold text-sm">Kelola &rarr;</span>
+                </div>
+            </a>
+            <a href="{{ route('owner.assets.index') }}" class="block bg-emerald-50 border border-emerald-100 rounded-2xl p-6 hover:shadow-md transition">
+                <p class="text-xs font-bold tracking-widest uppercase text-emerald-400 mb-2">Total Aset Tercatat</p>
+                <div class="flex justify-between items-end">
+                    <p class="text-3xl font-bold text-emerald-900">{{ $totalAssets }}</p>
+                    <span class="text-emerald-600 font-bold text-sm">Kelola &rarr;</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Kartu Metrik Finansial & Operasional -->
+        <h3 class="font-bold text-gray-800 uppercase tracking-widest text-xs mb-4">Finansial & Operasional</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                <p class="text-xs font-bold tracking-widest uppercase text-gray-400 mb-2">Biaya Bulan Ini</p>
+                <p class="text-3xl font-bold text-gray-900">Rp {{ number_format($totalCostMonth, 0, ',', '.') }}</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                <p class="text-xs font-bold tracking-widest uppercase text-gray-400 mb-2">Biaya Tahun Ini</p>
+                <p class="text-3xl font-bold text-gray-900">Rp {{ number_format($totalCostYear, 0, ',', '.') }}</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                <p class="text-xs font-bold tracking-widest uppercase text-gray-400 mb-2">Kesehatan Aset</p>
+                <p class="text-3xl font-bold {{ $assetHealthPct > 70 ? 'text-green-600' : 'text-amber-500' }}">{{ $assetHealthPct }}%</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                <p class="text-xs font-bold tracking-widest uppercase text-gray-400 mb-2">Keluhan Selesai</p>
+                <p class="text-3xl font-bold text-gray-900">{{ $resolvedComplaints }} <span class="text-lg text-gray-400 font-medium">/ {{ $totalComplaints }}</span></p>
             </div>
         </div>
-        @empty
-        <p class="text-gray-400 text-sm font-light">No request data available.</p>
-        @endforelse
-        <script>
-            setTimeout(() => {
-                document.querySelectorAll('[data-width]').forEach(el => {
-                    el.style.width = el.getAttribute('data-width');
-                });
-            }, 500);
-        </script>
-    </div>
 
-    <div class="bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 p-8 flex flex-col justify-center space-y-4" data-aos="fade-up" data-aos-delay="100">
-        <h3 class="font-playfair text-xl font-bold text-gray-900 mb-4">Quick Navigation</h3>
-        <a href="{{ route('owner.approvals.index') }}" class="group flex items-center justify-between bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl p-5 transition-all">
-            <span class="font-medium text-gray-900 group-hover:pl-2 transition-all duration-300">Repair Approvals</span>
-            @if($pendingApprovals > 0)
-                <span class="bg-gray-900 text-white px-3 py-1 rounded-full text-xs font-medium">{{ $pendingApprovals }} pending</span>
-            @else
-                <span class="text-gray-400 text-sm">&rarr;</span>
-            @endif
-        </a>
-        <a href="{{ route('owner.cost-log.index') }}" class="group flex items-center justify-between bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl p-5 transition-all">
-            <span class="font-medium text-gray-900 group-hover:pl-2 transition-all duration-300">Cost History Log</span>
-            <span class="text-gray-400 text-sm">&rarr;</span>
-        </a>
-    </div>
-</div>
-@endsection
+    </main>
+</body>
+</html>

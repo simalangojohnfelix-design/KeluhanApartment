@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Models\Complaint;
 use App\Models\WorkOrder;
@@ -12,10 +14,11 @@ class ComplaintController extends Controller {
         $technicians = User::where('role', 'technician')->get();
         return view('admin.complaints.index', compact('complaints', 'technicians'));
     }
+
     public function update(Request $request, $id) {
         $complaint = Complaint::findOrFail($id);
         
-        // If assigning a technician and moving to assigned/in_progress
+        // Jika admin memilih teknisi dan mengarahkan ke status assigned
         if ($request->has('technician_id') && $request->technician_id != '') {
             $complaint->update(['status' => 'assigned']);
             WorkOrder::updateOrCreate(
@@ -27,6 +30,7 @@ class ComplaintController extends Controller {
                 ]
             );
         } else {
+            // Untuk penanganan status lain seperti 'rejected'
             $complaint->update(['status' => $request->status]);
         }
         

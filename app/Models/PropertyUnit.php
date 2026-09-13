@@ -1,21 +1,21 @@
 <?php
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PropertyUnit extends Model
 {
-    protected $fillable = ['unit_number', 'type', 'floor', 'status', 'user_id', 'lease_start', 'lease_end'];
+    use HasFactory;
 
-    public function tenant() {
-        return $this->belongsTo(User::class, 'user_id');
+    protected $guarded = []; // atau $fillable yang sudah Anda atur sebelumnya
+
+    // Tambahkan relasi ini
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
-    
-    public function assets() {
-        return $this->hasMany(Asset::class);
-    }
-    
-    public function complaints() {
-        return $this->hasMany(Complaint::class);
-    }
+
+    // Biarkan relasi lain yang sudah ada (misalnya: complaints atau assets)
 }

@@ -2,11 +2,14 @@
 @section('content')
 <div class="bg-white p-6 rounded shadow max-w-xl mx-auto">
     <div class="mb-5">
-        <a href="{{ route('tenant.complaints.index') }}" class="text-sm text-gray-500 hover:text-gray-700">&larr; Kembali</a>
+        <!-- Rute kembali diubah ke dashboard -->
+        <a href="{{ route('tenant.dashboard') }}" class="text-sm text-gray-500 hover:text-gray-700">&larr; Batal & Kembali ke Dashboard</a>
         <h2 class="text-xl font-bold mt-1">Buat Keluhan Baru</h2>
     </div>
     @if(session('success'))<div class="bg-green-100 text-green-700 p-3 rounded mb-4">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm"><ul class="list-disc pl-4">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
+    
+    <!-- Action form diubah ke complaints.store -->
     <form action="{{ route('tenant.complaints.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
         @csrf
         <div>
@@ -57,7 +60,7 @@
             <input type="file" name="photo" accept="image/*" class="mt-1 block w-full text-sm text-gray-500">
             <p class="text-xs text-gray-400 mt-1">Maks. 5MB. Format: JPG, PNG, WEBP.</p>
         </div>
-        <button type="submit" class="w-full bg-red-600 text-white py-2.5 px-4 rounded font-bold hover:bg-red-700">Kirim Keluhan</button>
+        <button type="submit" class="w-full bg-blue-600 text-white py-2.5 px-4 rounded font-bold hover:bg-blue-700">Kirim Keluhan</button>
     </form>
 </div>
 @endsection

@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Models\PropertyUnit;
+use App\Models\Asset;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AssetController;
 use App\Http\Controllers\Admin\PropertyUnitController;
@@ -34,7 +37,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 // Tenant Routes
 Route::middleware(['auth', 'role:tenant'])->prefix('tenant')->name('tenant.')->group(function() {
-    Route::get('/dashboard', function() { return view('tenant.dashboard'); })->name('dashboard');
+    // Rute dashboard dimodifikasi untuk menarik data unit dan aset penyewa yang sedang login
+    Route::get('/dashboard', function() { 
+        $unit = PropertyUnit::where('user_id', Auth::id())->first();
+        // Jika unit ditemukan, ambil asetnya. Jika tidak, kirim koleksi kosong.
+        $assets = $unit ? Asset::where('property_unit_id', $unit->id)->get() : collect();
+        
+        return view('tenant.dashboard', compact('assets')); 
+    })->name('dashboard');
+    
     Route::resource('complaints', TenantComplaintController::class);
     Route::post('complaints/{id}/rate', [TenantComplaintController::class, 'rate'])->name('complaints.rate');
     Route::get('assets', [UnitAssetController::class, 'index'])->name('assets.index');
@@ -44,13 +55,19 @@ Route::middleware(['auth', 'role:tenant'])->prefix('tenant')->name('tenant.')->g
 Route::middleware(['auth', 'role:technician'])->prefix('technician')->name('technician.')->group(function() {
     Route::get('/tasks', [WorkOrderController::class, 'index'])->name('tasks.index');
     Route::get('/tasks/{id}', [WorkOrderController::class, 'show'])->name('tasks.show');
+    Route::get('/tasks/{id}/invoice', [WorkOrderController::class, 'invoice'])->name('tasks.invoice');
     Route::put('/tasks/{id}', [WorkOrderController::class, 'update'])->name('tasks.update');
 });
 
-// Owner Routes
 Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->group(function() {
+    // Memanggil alias yang sudah Anda daftarkan di bagian 'use' paling atas
     Route::get('/dashboard', [OwnerDashboardController::class, 'index'])->name('dashboard');
     Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
     Route::put('/approvals/{id}', [ApprovalController::class, 'update'])->name('approvals.update');
     Route::get('/cost-log', [CostLogController::class, 'index'])->name('cost-log.index');
+
+    // Route CRUD Mutlak Owner (Tetap pakai full path agar tidak bentrok dengan controller Admin di atas)
+    Route::resource('users', \App\Http\Controllers\Owner\UserController::class);
+    Route::resource('units', \App\Http\Controllers\Owner\UnitController::class);
+    Route::resource('assets', \App\Http\Controllers\Owner\AssetController::class);
 });

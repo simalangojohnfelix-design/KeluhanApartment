@@ -23,12 +23,14 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Roles: Admin
-        User::create(['name' => 'Admin SIPEMA', 'email' => 'admin@mail.com', 'password' => Hash::make('password'), 'role' => 'admin']);
+        User::create(['name' => 'Admin SIPEMA', 'email' => 'admin@mail.com', 'password' => Hash::make('AdminPalazzo123!'), 'role' => 'admin']);
+        
         // Technicians
-        User::create(['name' => 'Budi Santoso', 'email' => 'tech@mail.com', 'password' => Hash::make('password'), 'role' => 'technician']);
-        User::create(['name' => 'Agus Prabowo', 'email' => 'tech2@mail.com', 'password' => Hash::make('password'), 'role' => 'technician']);
+        User::create(['name' => 'Budi Santoso', 'email' => 'tech@mail.com', 'password' => Hash::make('TechBudi2026'), 'role' => 'technician']);
+        User::create(['name' => 'Agus Prabowo', 'email' => 'tech2@mail.com', 'password' => Hash::make('TechAgus2026'), 'role' => 'technician']);
+        
         // Owner
-        User::create(['name' => 'Owner Properti', 'email' => 'owner@mail.com', 'password' => Hash::make('password'), 'role' => 'owner']);
+        User::create(['name' => 'Owner Properti', 'email' => 'owner@mail.com', 'password' => Hash::make('OwnerBos789'), 'role' => 'owner']);
 
         // 10 Tenant accounts with lease ending in 2030
         $tenants = [
@@ -49,7 +51,8 @@ class DatabaseSeeder extends Seeder
             $user = User::create([
                 'name'     => $data['name'],
                 'email'    => "tenant{$num}@mail.com",
-                'password' => Hash::make('password'),
+                // Password dinamis berdasarkan nomor unit (Contoh: TenantA-101!)
+                'password' => Hash::make('Tenant' . $data['unit'] . '!'),
                 'role'     => 'tenant',
                 'phone'    => $data['phone'],
             ]);

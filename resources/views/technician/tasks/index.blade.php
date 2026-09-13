@@ -1,42 +1,93 @@
-@extends('layouts.app')
+@extends('layouts.app') 
 
 @section('content')
-<div class="mb-10 flex flex-col md:flex-row md:items-end justify-between border-b border-gray-200 pb-6" data-aos="fade-down">
-    <div>
-        <h2 class="font-playfair text-3xl font-bold text-gray-900">Work Orders</h2>
-        <p class="text-gray-500 mt-2 font-light">Assigned maintenance tasks</p>
+<div class="max-w-6xl mx-auto space-y-6" style="font-family: 'Inter', sans-serif;">
+    
+    <!-- Header Halaman -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h2 class="text-3xl font-bold text-gray-800" style="font-family: 'Playfair Display', serif;">Antrean Tugas Perbaikan</h2>
+            <p class="text-gray-500 mt-1 text-sm">Kelola dan pantau surat tugas pemeliharaan unit apartemen Anda.</p>
+        </div>
     </div>
-</div>
 
-<div class="space-y-6">
-    @forelse($tasks as $index => $task)
-    @php $urgency = optional($task->complaint)->urgency; @endphp
-    <div class="bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 p-8 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 relative overflow-hidden" data-aos="fade-up" data-aos-delay="{{ $index * 50 }}">
-        <div class="absolute top-0 left-0 w-full h-1 {{ $urgency == 'high' ? 'bg-red-500' : ($urgency == 'medium' ? 'bg-amber-500' : 'bg-gray-900') }}"></div>
-        
-        <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-4 gap-4">
-            <div>
-                <div class="flex items-center gap-3 mb-2">
-                    <span class="font-playfair font-bold text-gray-400">WO-{{ $task->id }}</span>
-                    <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                    <span class="text-[10px] font-semibold tracking-widest uppercase {{ $urgency=='high' ? 'text-red-500' : ($urgency=='medium' ? 'text-amber-500' : 'text-gray-500') }}">{{ $urgency }} Priority</span>
-                </div>
-                <h3 class="font-playfair text-2xl font-semibold text-gray-900">{{ optional($task->complaint)->title }}</h3>
-                <p class="text-sm text-gray-500 mt-1 font-light">Unit <strong class="text-gray-900">{{ optional(optional($task->complaint)->propertyUnit)->unit_number }}</strong> &mdash; {{ optional(optional($task->complaint)->tenant)->name }}</p>
-            </div>
-            <x-status-badge :status="$task->status" />
-        </div>
-        
-        <p class="text-gray-500 text-sm font-light leading-relaxed mb-6">{{ Str::limit(optional($task->complaint)->description, 120) }}</p>
-        
-        <div class="pt-4 border-t border-gray-50">
-            <a href="{{ route('technician.tasks.show', $task->id) }}" class="text-sm font-medium text-gray-900 border-b border-gray-900 pb-0.5 hover:text-gray-500 hover:border-gray-500 transition">View & Update Details</a>
-        </div>
+    @if(session('success'))
+    <div class="bg-green-100 border border-green-200 text-green-700 p-4 rounded-xl font-medium shadow-sm">
+        {{ session('success') }}
     </div>
-    @empty
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-16 text-center" data-aos="fade-up">
-        <p class="text-gray-400 font-light">No tasks are currently assigned to you.</p>
+    @endif
+
+    <!-- Bar Pencarian dan Filter di Atas Tabel -->
+    <form method="GET" action="{{ route('technician.tasks.index') }}" class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row gap-4 justify-between items-center">
+        
+        <!-- Input Pencarian -->
+        <div class="w-full md:w-1/2 flex gap-2">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari keluhan, deskripsi, atau nomor unit..." class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition shadow-sm">
+                Cari
+            </button>
+        </div>
+
+        <!-- Filter Status -->
+        <div class="w-full md:w-auto flex items-center gap-2">
+            <select name="status" onchange="this.form.submit()" class="w-full md:w-auto border border-gray-300 rounded-lg px-4 py-2.5 text-sm outline-none bg-white focus:ring-2 focus:ring-blue-500 text-gray-700 font-medium">
+                <option value="">Semua Status</option>
+                <option value="ready" {{ request('status') == 'ready' ? 'selected' : '' }}>Siap Dikerjakan / Aktif</option>
+                <option value="waiting_approval" {{ request('status') == 'waiting_approval' ? 'selected' : '' }}>Menunggu ACC Owner</option>
+                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Selesai</option>
+            </select>
+
+            @if(request('search') || request('status'))
+                <a href="{{ route('technician.tasks.index') }}" class="text-xs font-bold text-gray-600 hover:text-gray-900 bg-gray-100 px-3.5 py-2.5 rounded-lg transition border border-gray-200">
+                    Reset
+                </a>
+            @endif
+        </div>
+    </form>
+
+    <!-- Tabel Daftar Tugas -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-gray-50 border-b border-gray-200 text-gray-600 text-xs uppercase tracking-wide">
+                <tr>
+                    <th class="p-4 font-bold">No. WO & Unit</th>
+                    <th class="p-4 font-bold">Rincian Keluhan</th>
+                    <th class="p-4 font-bold">Status Pekerjaan</th>
+                    <th class="p-4 font-bold text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 text-sm">
+                @forelse($tasks as $task)
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="p-4">
+                        <span class="font-bold text-gray-800">WO-{{ $task->id }}</span>
+                        <div class="text-xs text-gray-500 mt-1">Unit: <span class="font-semibold">{{ optional(optional($task->complaint)->propertyUnit)->unit_number ?: '-' }}</span></div>
+                    </td>
+                    <td class="p-4">
+                        <div class="font-bold text-gray-800">{{ optional($task->complaint)->title }}</div>
+                        <div class="text-xs text-gray-500 mt-1 line-clamp-1">{{ optional($task->complaint)->description }}</div>
+                    </td>
+                    <td class="p-4">
+                        <span class="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide 
+                            {{ $task->status == 'completed' ? 'bg-green-100 text-green-700' : ($task->status == 'waiting_approval' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700') }}">
+                            {{ str_replace('_', ' ', $task->status) }}
+                        </span>
+                    </td>
+                    <td class="p-4 text-center">
+                        <a href="{{ route('technician.tasks.show', $task->id) }}" class="inline-block bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-sm">
+                            Kelola Tugas &rarr;
+                        </a>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="4" class="p-12 text-center text-gray-500 font-medium">
+                        Tidak ada tugas yang ditemukan sesuai pencarian atau filter Anda.
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
-    @endforelse
 </div>
 @endsection
